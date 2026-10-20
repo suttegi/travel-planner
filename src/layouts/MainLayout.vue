@@ -1,22 +1,43 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+  <q-layout view="hHh lpR fFf">
+    <q-header class="bg-white main-header">
+      <div class="container row items-center no-wrap q-py-sm">
+        <router-link to="/" class="logo text-brand">Travel Planner</router-link>
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+        <div class="nav-pill row items-center no-wrap q-gutter-x-sm q-ml-lg">
+          <q-icon name="img:/assets/icons/avia.svg" size="24px" />
+          <span>Авиабилеты</span>
+        </div>
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
+        <q-space />
+
+        <q-btn v-if="!auth.isLoggedIn" flat no-caps :ripple="false" to="/login">
+          <q-icon name="img:/assets/icons/user.svg" size="24px" />
+          <span class="q-ml-xs">Войти</span>
+        </q-btn>
+
+        <q-btn v-else flat no-caps :ripple="false">
+          <q-icon name="img:/assets/icons/user.svg" size="24px" />
+          <span class="q-ml-xs">{{ auth.user?.username ?? 'Профиль' }}</span>
+          <q-menu anchor="bottom right" self="top right" :offset="[0, 8]" class="popup-card">
+            <q-list class="q-pa-sm" style="min-width: 200px">
+              <q-item v-close-popup clickable to="/my-tickets" class="menu-item">
+                <q-item-section avatar>
+                  <q-icon name="confirmation_number" />
+                </q-item-section>
+                <q-item-section>Мои билеты</q-item-section>
+              </q-item>
+              <q-item v-close-popup clickable class="menu-item" @click="onLogout">
+                <q-item-section avatar>
+                  <q-icon name="logout" />
+                </q-item-section>
+                <q-item-section>Выйти</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
     </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
-
-        <EssentialLink v-for="link in linksList" :key="link.label" v-bind="link" />
-      </q-list>
-    </q-drawer>
 
     <q-page-container>
       <router-view />
@@ -25,57 +46,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from '@/components/EssentialLink.vue';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
-const linksList: EssentialLinkProps[] = [
-  {
-    label: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    label: 'GitHub',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    label: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    label: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    label: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    label: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    label: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
-];
+const auth = useAuthStore();
+const router = useRouter();
 
-const leftDrawerOpen = ref(false);
+onMounted(() => {
+  if (auth.token && !auth.user) void auth.fetchMe();
+});
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+const onLogout = () => {
+  auth.logout();
+  void router.push('/');
+};
 </script>
+
+<style lang="scss" scoped>
+.main-header {
+  color: var(--q-brand-black);
+  border-bottom: 1px solid #ebedf0;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-pill {
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: var(--q-brand-light);
+  font-size: 16px;
+}
+
+.menu-item {
+  border-radius: 12px;
+}
+</style>

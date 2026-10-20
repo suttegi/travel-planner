@@ -6,7 +6,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('@/pages/IndexPage.vue') },
-      { path: 'second', component: () => import('@/pages/SecondPage.vue') },
+      { path: 'search-results', component: () => import('@/pages/flight/SearchResultPage.vue') },
+      {
+        path: 'booking/:flightId',
+        component: () => import('@/pages/flight/BookPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'my-tickets',
+        component: () => import('@/pages/MyTicketsPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      { path: 'login', component: () => import('@/pages/LoginPage.vue') },
     ],
   },
 
